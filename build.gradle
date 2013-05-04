@@ -1,7 +1,7 @@
 apply plugin: 'groovy'
 apply plugin: 'maven'
 
-version = '0.1-SNAPSHOT'
+version = '0.1'
 group = 'com.github.camel-script'
 
 repositories {
@@ -15,4 +15,5 @@ task wrapper(type: Wrapper) {
 dependencies {
 	compile("org.apache.camel:camel-core:2.10.4")
 	compile("org.codehaus.groovy:groovy:2.0.5")
+	testCompile("junit:junit:4.11")
 }
