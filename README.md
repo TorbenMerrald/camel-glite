@@ -7,3 +7,5 @@ the connector code can still be a real pain.  camel-script aims at
 making this easier by providing a simple class to use Apache Camel's
 endpoints directly.
 
+Examples
+========
