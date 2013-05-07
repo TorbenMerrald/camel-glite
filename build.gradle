@@ -27,16 +27,18 @@ artifacts {
     archives sourcesJar
 }
 
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            repository (
-                    url: "https://api.bintray.com/maven/thomas-p-barker/camel-script/camel-script"
-            ) {
-                authentication(
-                        userName: bintray_username,
-                        password: bintray_api_key
-                )
+if (project.properties.containsKey("bintray_username")) {
+    uploadArchives {
+        repositories {
+            mavenDeployer {
+                repository (
+                        url: "https://api.bintray.com/maven/thomas-p-barker/camel-script/camel-script"
+                ) {
+                    authentication(
+                            userName: bintray_username,
+                            password: bintray_api_key
+                    )
+                }
             }
         }
     }
