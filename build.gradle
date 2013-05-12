@@ -13,9 +13,9 @@ task wrapper(type: Wrapper) {
 }
 
 dependencies {
-	compile("org.apache.camel:camel-core:2.10.4")
-	compile("org.codehaus.groovy:groovy:2.0.5")
-	testCompile("junit:junit:4.11")
+    compile("org.apache.camel:camel-core:2.10.4")
+    compile("org.codehaus.groovy:groovy:2.0.5")
+    testCompile "org.spockframework:spock-core:0.7-groovy-2.0"
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
@@ -31,7 +31,7 @@ if (project.properties.containsKey("bintray_username")) {
     uploadArchives {
         repositories {
             mavenDeployer {
-                repository (
+                repository(
                         url: "https://api.bintray.com/maven/thomas-p-barker/camel-script/camel-script"
                 ) {
                     authentication(
