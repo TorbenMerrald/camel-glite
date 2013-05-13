@@ -14,11 +14,11 @@ import spock.lang.Specification
  * @author Tommy Barker
  *
  */
-class CamelScriptSpock extends Specification {
+class CamelGLiteSpock extends Specification {
 
     @Rule
     TemporaryFolder tmpDirectory = new TemporaryFolder()
-    def camelScript = new CamelScript()
+    def camelScript = new CamelGLite()
 
     def setup() {
         createFiles()
@@ -40,7 +40,7 @@ class CamelScriptSpock extends Specification {
 
         then: "the uncapitalized name of the class is used"
         def registry = camelScript.camelContext.registry
-        this == registry.lookup("camelScriptSpock")
+        this == registry.lookup("camelGLiteSpock")
     }
 
     def "basic routing test"() {

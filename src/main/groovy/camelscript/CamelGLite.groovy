@@ -6,7 +6,6 @@ import org.apache.camel.Exchange
 import org.apache.camel.ProducerTemplate
 import org.apache.camel.impl.DefaultCamelContext
 import org.apache.camel.impl.DefaultExchange
-import org.apache.camel.impl.JndiRegistry
 import org.apache.camel.impl.PropertyPlaceholderDelegateRegistry
 import org.apache.camel.impl.SimpleRegistry
 import org.codehaus.groovy.runtime.typehandling.GroovyCastException
@@ -16,13 +15,13 @@ import java.util.concurrent.Future
 /**
  * @author Tommy Barker
  */
-class CamelScript {
+class CamelGLite {
 
     final CamelContext camelContext
     final ProducerTemplate producerTemplate
     final ConsumerTemplate consumerTemplate
 
-    public CamelScript() {
+    public CamelGLite() {
         camelContext = new DefaultCamelContext()
         def registry = new PropertyPlaceholderDelegateRegistry(camelContext, new SimpleRegistry())
         camelContext.registry = registry
@@ -30,7 +29,7 @@ class CamelScript {
         consumerTemplate = camelContext.createConsumerTemplate()
     }
 
-    CamelScript bind(object) {
+    CamelGLite bind(object) {
         checkNull(object)
 
         def name = object.class.getSimpleName()
@@ -49,7 +48,7 @@ class CamelScript {
         }
     }
 
-    CamelScript bind(String name, object) {
+    CamelGLite bind(String name, object) {
         checkNull(name)
         checkNull(object)
         //the first registry is a PropertyPlaceholderDelegateRegistry that delegates to a JndiRegsitry
@@ -58,7 +57,7 @@ class CamelScript {
         return this
     }
 
-    CamelScript consume(String endpoint, Closure closure) {
+    CamelGLite consume(String endpoint, Closure closure) {
         def consumer = { ConsumerTemplate consumerTemplate ->
             return consumerTemplate.receive(endpoint)
         }
@@ -66,7 +65,7 @@ class CamelScript {
         return this
     }
 
-    CamelScript consumeNoWait(String endpoint, Closure closure) {
+    CamelGLite consumeNoWait(String endpoint, Closure closure) {
         def consumer = { ConsumerTemplate consumerTemplate ->
             return consumerTemplate.receiveNoWait(endpoint)
         }

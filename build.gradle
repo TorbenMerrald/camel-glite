@@ -32,7 +32,7 @@ if (project.properties.containsKey("bintray_username")) {
         repositories {
             mavenDeployer {
                 repository(
-                        url: "https://api.bintray.com/maven/thomas-p-barker/camel-script/camel-script"
+                        url: "https://api.bintray.com/maven/thomas-p-barker/camel-glite/camel-glite"
                 ) {
                     authentication(
                             userName: bintray_username,
