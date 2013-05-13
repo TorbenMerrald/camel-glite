@@ -11,6 +11,10 @@ bells and whistles.
 
 Download
 ========
+* Download Directly
+
+    https://bintray.com/version/show/files/thomas-p-barker/camel-glite/camel-glite/0.1/com/github/camel-script/camel-glite/0.1
+
 * Groovy Grape
 * Maven
 
