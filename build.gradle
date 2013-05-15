@@ -2,7 +2,7 @@ apply plugin: 'groovy'
 apply plugin: 'maven'
 
 version = '0.1'
-group = 'com.github.camel-script'
+group = 'com.github.camel-glite'
 
 repositories {
     mavenCentral()
