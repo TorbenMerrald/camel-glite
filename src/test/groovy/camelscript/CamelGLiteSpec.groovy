@@ -14,7 +14,7 @@ import spock.lang.Specification
  * @author Tommy Barker
  *
  */
-class CamelGLiteSpock extends Specification {
+class CamelGLiteSpec extends Specification {
 
     @Rule
     TemporaryFolder tmpDirectory = new TemporaryFolder()
@@ -40,9 +40,10 @@ class CamelGLiteSpock extends Specification {
 
         then: "the uncapitalized name of the class is used"
         def registry = camelScript.camelContext.registry
-        this == registry.lookup("camelGLiteSpock")
+        this == registry.lookup("camelGLiteSpec")
     }
 
+    @SuppressWarnings("GroovyVariableNotAssigned")
     def "basic routing test"() {
         when:
         def fromCalled = false
@@ -75,7 +76,7 @@ class CamelGLiteSpock extends Specification {
         camelScript.bind("fileFilter", fileFilter)
 
         createFiles()
-        MockEndpoint mock = context.getEndpoint("mock:endFull")
+        MockEndpoint mock = context.getEndpoint("mock:endFull", MockEndpoint)
         mock.expectedMessageCount(4)
         Set fileNames = []
 
@@ -97,6 +98,7 @@ class CamelGLiteSpock extends Specification {
         mock.assertIsSatisfied()
     }
 
+    @SuppressWarnings("GroovyUnusedCatchParameter")
     def "test routing failures"() {
         createFiles()
         boolean exceptionOccurred = false
@@ -106,7 +108,8 @@ class CamelGLiteSpock extends Specification {
                 consume("file://${tmpDirectory.root.path}?initialDelay=0&moveFailed=.error" as String) { GenericFile file ->
                     throw new RuntimeException("maent to fail for testing")
                 }
-            } catch (RuntimeException e) {
+            }
+            catch (RuntimeException e) {
                 exceptionOccurred = true
             }
         }
@@ -141,6 +144,29 @@ class CamelGLiteSpock extends Specification {
         5 == response
     }
 
+    def "check error handling from response"() {
+        setup:
+        setupErrorRoute()
+
+        when:
+        camelScript.send("direct:start", "foo")
+
+        then:
+        thrown ResponseException
+    }
+
+    def "check error handling from async response"() {
+        setup:
+        setupErrorRoute()
+
+        when:
+        def future = camelScript.asyncSend("direct:start", "bar")
+        future.get()
+
+        then:
+        thrown ResponseException
+    }
+
     def getErrorDirectory() {
         new File("${tmpDirectory.root.path}/.error")
     }
@@ -153,6 +179,23 @@ class CamelGLiteSpock extends Specification {
         tmpDirectory.newFile("file4")
         tmpDirectory.newFile("file5")
         tmpDirectory.newFile("file6")
+    }
+
+    def setupErrorRoute() {
+        def camelContext = camelScript.camelContext
+        camelContext.addRoutes(
+                new RouteBuilder() {
+                    @Override
+                    void configure() throws Exception {
+                        from("direct:start").process(
+                                {
+                                    throw new RuntimeException("meant to do that")
+                                } as Processor
+                        )
+                    }
+                }
+        )
+        camelContext.start()
     }
 }
 
