@@ -57,7 +57,7 @@ if (project.properties.containsKey("bintrayUsername")) {
         repositories {
             mavenDeployer {
                 repository(
-                        url: "https://api.bintray.com/maven/upennlib/camel-glite/camel-glite"
+                        url: "https://api.bintray.com/maven/upennlib/camel/camel-glite"
                 ) {
                     authentication(
                             userName: bintrayUsername,
@@ -123,7 +123,7 @@ task prepareForBintrayUpload << {
         return
     }
 
-    def json = new URL("https://api.bintray.com/packages/upennlib/metridoc/metridoc-job-core").text
+    def json = new URL("https://api.bintray.com/packages/upennlib/camel/camel-glite").text
     def slurper = new JsonSlurper()
     def versions = slurper.parseText(json).versions
     def versionAlreadyDeployed = versions.contains(version)
@@ -140,7 +140,7 @@ task publishBintrayPackages(dependsOn: "uploadArchives") << {
     client.authorization = new HTTPBasicAuthorization(bintrayUsername, bintrayPassword)
     try {
         def response = client.post(
-                path: "/content/upennlib/metridoc/metridoc-job-core/$version/publish",
+                path: "/content/upennlib/camel/camel-glite/$version/publish",
                 accept: ContentType.JSON
         ) {
             type ContentType.JSON
