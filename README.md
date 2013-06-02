@@ -13,10 +13,39 @@ Download
 ========
 * Download Directly
 
-    https://bintray.com/version/show/files/thomas-p-barker/camel-glite/camel-glite/0.1/com/github/camel-script/camel-glite/0.1
+    http://dl.bintray.com/upennlib/camel/com/github/camel-glite/camel-glite/0.2.1/camel-glite-0.2.1.jar
 
 * Groovy Grape
+
+    ```groovy
+    @Grab("com.github.camel-glite:camel-glite:0.2.1")
+    @GrabResolver(name='camel-glite', root='http://jcenter.bintray.com/')    
+    ```
+
 * Maven
+
+    ```xml
+    <project>
+        <repositories>
+            <repository>
+                <id>jcenter</id>
+                <url>http://jcenter.bintray.com/</url>
+            </repository>
+        </repositories>
+        
+        ...
+        
+        <dependencies>
+            <dependency>
+                <groupId>com.github.camel-glite</groupId>
+                <artifactId>camel-glite</artifact>
+                <version>0.2.1</version>
+            </dependency>
+            ...
+        </dependencies>
+    </project>
+    ```
+
 
 Examples
 ========
