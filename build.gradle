@@ -9,7 +9,7 @@ apply plugin: 'maven'
 sourceCompatibility = "1.7"
 targetCompatibility = "1.7"
 
-version = '0.2.1'
+version = '0.2.2'
 group = 'com.github.camel-glite'
 description = """
 A simple wrapper around Apache Camel's ProducerTemplate and ConsumerTemplate.  Makes it easy to script against camel's
@@ -150,7 +150,8 @@ task publishBintrayPackages(dependsOn: "uploadArchives") << {
             text ""
         }
         println response.getContentAsString()
-    } catch (RESTClientException ex) {
+    }
+    catch (RESTClientException ex) {
         println ""
         println "COULD NOT PUBLISH"
         println ex.response.getContentAsString()
