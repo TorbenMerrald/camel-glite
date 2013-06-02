@@ -167,6 +167,17 @@ class CamelGLiteSpec extends Specification {
         thrown ResponseException
     }
 
+    def "hello world example with timer"() {
+        when: "when consuming from a timer"
+        def consumeOccurred = false
+        camelScript.consume("timer:jdkTimer?period=100") {
+            consumeOccurred = true
+        }
+
+        then: "the callback should be called"
+        consumeOccurred
+    }
+
     def getErrorDirectory() {
         new File("${tmpDirectory.root.path}/.error")
     }

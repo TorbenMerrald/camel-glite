@@ -1,9 +1,7 @@
 package camelscript
 
-import org.apache.camel.CamelContext
-import org.apache.camel.ConsumerTemplate
-import org.apache.camel.Exchange
-import org.apache.camel.ProducerTemplate
+import groovy.util.logging.Slf4j
+import org.apache.camel.*
 import org.apache.camel.impl.DefaultCamelContext
 import org.apache.camel.impl.DefaultExchange
 import org.apache.camel.impl.PropertyPlaceholderDelegateRegistry
@@ -15,7 +13,8 @@ import java.util.concurrent.Future
 /**
  * @author Tommy Barker
  */
-class CamelGLite {
+@Slf4j
+class CamelGLite implements Closeable {
 
     final CamelContext camelContext
     final ProducerTemplate producerTemplate
@@ -27,6 +26,10 @@ class CamelGLite {
         camelContext.registry = registry
         producerTemplate = camelContext.createProducerTemplate()
         consumerTemplate = camelContext.createConsumerTemplate()
+        camelContext.start()
+        addShutdownHook {
+            close()
+        }
     }
 
     CamelGLite bind(object) {
@@ -179,7 +182,17 @@ class CamelGLite {
         exchange
     }
 
-
+    @Override
+    void close() throws IOException {
+        try {
+            if (camelContext.status != ServiceStatus.Stopped) {
+                camelContext.stop()
+            }
+        }
+        catch (Throwable ignore) {
+            log.warn "Could not shutdown camel context properly"
+        }
+    }
 }
 
 class WrappedResponseExchange implements Exchange {
