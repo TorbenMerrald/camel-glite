@@ -9,7 +9,7 @@ apply plugin: 'maven'
 sourceCompatibility = "1.7"
 targetCompatibility = "1.7"
 
-version = '0.2.2'
+version = '0.2.3'
 group = 'com.github.camel-glite'
 description = """
 A simple wrapper around Apache Camel's ProducerTemplate and ConsumerTemplate.  Makes it easy to script against camel's
@@ -44,8 +44,16 @@ task sourcesJar(type: Jar, dependsOn: classes) {
     from sourceSets.main.allSource
 }
 
+task packageJavadoc(type: Jar, dependsOn: 'javadoc') {
+    from javadoc.destinationDir
+    classifier = 'javadoc'
+}
+
 artifacts {
     archives sourcesJar
+    archives(packageJavadoc) {
+        type = 'javadoc'
+    }
 }
 
 install {
@@ -66,6 +74,8 @@ if (project.properties.containsKey("bintrayUsername")) {
                             password: bintrayPassword
                     )
                 }
+
+                configurePom(pom)
             }
         }
     }
