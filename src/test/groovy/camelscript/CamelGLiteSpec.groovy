@@ -42,7 +42,7 @@ class CamelGLiteSpec extends Specification {
 
         then: "the uncapitalized name of the class is used"
         def registry = camelGLite.camelContext.registry
-        this == registry.lookup(CAMEL_GLITE_SPEC)
+        this == registry.lookupByName(CAMEL_GLITE_SPEC)
     }
 
     @SuppressWarnings("GroovyVariableNotAssigned")
@@ -190,19 +190,19 @@ class CamelGLiteSpec extends Specification {
 
         then: "then I should be able to retrieve the value of foo from the registry"
         def registry = glite.camelContext.registry
-        "fam" == registry.lookup("foo")
+        "fam" == registry.lookupByName("foo")
 
         when: "when I add variable bar after construction"
         binding.setVariable("bar", "baz")
 
         then: "I should be able to grab its value from the registry as well"
-        "baz" == registry.lookup("bar")
+        "baz" == registry.lookupByName("bar")
 
         when: "bind method is called"
         glite.bind(this)
 
         then: "I should be able to retrieve value from registry and binding"
-        this == registry.lookup(CAMEL_GLITE_SPEC)
+        this == registry.lookupByName(CAMEL_GLITE_SPEC)
         binding.hasVariable(CAMEL_GLITE_SPEC)
     }
 
@@ -221,19 +221,19 @@ class CamelGLiteSpec extends Specification {
         when: "consuming forever from a time route with 100ms period, but interrupting thread after 500ms"
         int count = 0
         def thread = new Thread()
-
-
-        Thread.start {
+        thread.start {
             camelGLite.with {
-                consumeForever("timer:testTimer?period=100") {
+                consumeForever("timer:testTimer?period=100&delay=0") {
                     count++
                 }
             }
         }
         Thread.sleep(500)
         thread.interrupt()
+        thread.join(200) //give it a chance to finish
 
         then: "at least 2 messages should have been processed"
+        !thread.alive
         count >= 2
     }
 

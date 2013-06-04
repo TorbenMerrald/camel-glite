@@ -40,4 +40,24 @@ class BindingBackedRegistry implements Registry, Map {
 
         return result
     }
+
+    @Override
+    Object lookupByName(String name) {
+        lookup(name)
+    }
+
+    @Override
+    def <T> T lookupByNameAndType(String name, Class<T> type) {
+        lookup(name, type)
+    }
+
+    @Override
+    def <T> Map<String, T> findByTypeWithName(Class<T> type) {
+        lookupByType(type)
+    }
+
+    @Override
+    def <T> Set<T> findByType(Class<T> type) {
+        lookupByType(type).values() as Set
+    }
 }
