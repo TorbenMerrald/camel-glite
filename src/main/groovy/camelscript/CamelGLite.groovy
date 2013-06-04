@@ -83,6 +83,17 @@ class CamelGLite implements Closeable {
         return this
     }
 
+    void consumeForever(String endpoint, Closure closure) {
+        consumeForever(endpoint, 5000L, closure)
+    }
+
+    void consumeForever(String endpoint, long wait, Closure closure) {
+        while (!Thread.currentThread().isInterrupted()) {
+            consumeWait(endpoint, wait, closure)
+        }
+        log.info "[consumeForever] was interrupted"
+    }
+
     CamelGLite consumeNoWait(String endpoint, Closure closure) {
         def consumer = { ConsumerTemplate consumerTemplate ->
             return consumerTemplate.receiveNoWait(endpoint)

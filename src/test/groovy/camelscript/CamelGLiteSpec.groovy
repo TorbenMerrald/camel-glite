@@ -20,28 +20,28 @@ class CamelGLiteSpec extends Specification {
     public static final String CAMEL_GLITE_SPEC = "camelGLiteSpec"
     @Rule
     TemporaryFolder tmpDirectory = new TemporaryFolder()
-    def camelScript = new CamelGLite()
+    def camelGLite = new CamelGLite()
 
     def setup() {
         createFiles()
     }
 
     def "test null binding failure"() {
-        when: camelScript.bind(null)
+        when: camelGLite.bind(null)
         then: thrown IllegalArgumentException
     }
 
     def "test null value binding faillure"() {
-        when: camelScript.bind("foo", null)
+        when: camelGLite.bind("foo", null)
         then: thrown IllegalArgumentException
     }
 
     def "test binding names"() {
         when: "no name is given for the binding"
-        camelScript.bind(this)
+        camelGLite.bind(this)
 
         then: "the uncapitalized name of the class is used"
-        def registry = camelScript.camelContext.registry
+        def registry = camelGLite.camelContext.registry
         this == registry.lookup(CAMEL_GLITE_SPEC)
     }
 
@@ -50,7 +50,7 @@ class CamelGLiteSpec extends Specification {
         when:
         def fromCalled = false
         def body
-        camelScript.with {
+        camelGLite.with {
             asyncSend("seda:test", "testBody")
             consume("seda:test") {
                 body = it
@@ -64,7 +64,7 @@ class CamelGLiteSpec extends Specification {
     }
 
     def "test more complex routing"() {
-        def context = camelScript.camelContext
+        def context = camelGLite.camelContext
         def fileFilter = [
                 accept: { GenericFile file ->
                     return file.fileName.startsWith("file1") ||
@@ -75,7 +75,7 @@ class CamelGLiteSpec extends Specification {
                 }
         ] as GenericFileFilter
 
-        camelScript.bind("fileFilter", fileFilter)
+        camelGLite.bind("fileFilter", fileFilter)
 
         createFiles()
         MockEndpoint mock = context.getEndpoint("mock:endFull", MockEndpoint)
@@ -85,7 +85,7 @@ class CamelGLiteSpec extends Specification {
         when:
         //let's do 5 messages.  The fifth should be ignored because of the file filter
         (1..5).each {
-            camelScript.with {
+            camelGLite.with {
                 consumeWait("file://${tmpDirectory.root.path}?noop=true&initialDelay=0&filter=#fileFilter" as String, 1000L) { GenericFile file ->
                     if (file != null) {
                         fileNames << file.fileName
@@ -105,7 +105,7 @@ class CamelGLiteSpec extends Specification {
         createFiles()
         boolean exceptionOccurred = false
         when:
-        camelScript.with() {
+        camelGLite.with() {
             try {
                 consume("file://${tmpDirectory.root.path}?initialDelay=0&moveFailed=.error" as String) { GenericFile file ->
                     throw new RuntimeException("maent to fail for testing")
@@ -123,7 +123,7 @@ class CamelGLiteSpec extends Specification {
 
     def "check responses from a route"() {
         when:
-        def camelContext = camelScript.camelContext
+        def camelContext = camelGLite.camelContext
         camelContext.addRoutes(
                 new RouteBuilder() {
                     @Override
@@ -140,7 +140,7 @@ class CamelGLiteSpec extends Specification {
                 }
         )
         camelContext.start()
-        int response = camelScript.send("direct:start", "hello") as int
+        int response = camelGLite.send("direct:start", "hello") as int
 
         then:
         5 == response
@@ -151,7 +151,7 @@ class CamelGLiteSpec extends Specification {
         setupErrorRoute()
 
         when:
-        camelScript.send("direct:start", "foo")
+        camelGLite.send("direct:start", "foo")
 
         then:
         thrown ResponseException
@@ -162,7 +162,7 @@ class CamelGLiteSpec extends Specification {
         setupErrorRoute()
 
         when:
-        def future = camelScript.asyncSend("direct:start", "bar")
+        def future = camelGLite.asyncSend("direct:start", "bar")
         future.get()
 
         then:
@@ -172,7 +172,7 @@ class CamelGLiteSpec extends Specification {
     def "hello world example with timer"() {
         when: "when consuming from a timer"
         def consumeOccurred = false
-        camelScript.consume("timer:jdkTimer?period=100") {
+        camelGLite.consume("timer:jdkTimer?period=100") {
             consumeOccurred = true
         }
 
@@ -217,6 +217,26 @@ class CamelGLiteSpec extends Specification {
         thrown UnsupportedOperationException
     }
 
+    def "can consume forever until thread is interupted"() {
+        when: "consuming forever from a time route with 100ms period, but interrupting thread after 500ms"
+        int count = 0
+        def thread = new Thread()
+
+
+        Thread.start {
+            camelGLite.with {
+                consumeForever("timer:testTimer?period=100") {
+                    count++
+                }
+            }
+        }
+        Thread.sleep(500)
+        thread.interrupt()
+
+        then: "at least 2 messages should have been processed"
+        count >= 2
+    }
+
     def getErrorDirectory() {
         new File("${tmpDirectory.root.path}/.error")
     }
@@ -232,7 +252,7 @@ class CamelGLiteSpec extends Specification {
     }
 
     def setupErrorRoute() {
-        def camelContext = camelScript.camelContext
+        def camelContext = camelGLite.camelContext
         camelContext.addRoutes(
                 new RouteBuilder() {
                     @Override
