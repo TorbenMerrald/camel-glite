@@ -44,8 +44,8 @@ task sourcesJar(type: Jar, dependsOn: classes) {
     from sourceSets.main.allSource
 }
 
-task packageJavadoc(type: Jar, dependsOn: 'javadoc') {
-    from javadoc.destinationDir
+task packageJavadoc(type: Jar, dependsOn: 'groovydoc') {
+    from groovydoc.destinationDir
     classifier = 'javadoc'
 }
 
