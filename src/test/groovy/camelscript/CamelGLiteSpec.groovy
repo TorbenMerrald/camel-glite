@@ -6,6 +6,7 @@ import org.apache.camel.builder.RouteBuilder
 import org.apache.camel.component.file.GenericFile
 import org.apache.camel.component.file.GenericFileFilter
 import org.apache.camel.component.mock.MockEndpoint
+import org.apache.camel.impl.JndiRegistry
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
@@ -16,6 +17,7 @@ import spock.lang.Specification
  */
 class CamelGLiteSpec extends Specification {
 
+    public static final String CAMEL_GLITE_SPEC = "camelGLiteSpec"
     @Rule
     TemporaryFolder tmpDirectory = new TemporaryFolder()
     def camelScript = new CamelGLite()
@@ -40,7 +42,7 @@ class CamelGLiteSpec extends Specification {
 
         then: "the uncapitalized name of the class is used"
         def registry = camelScript.camelContext.registry
-        this == registry.lookup("camelGLiteSpec")
+        this == registry.lookup(CAMEL_GLITE_SPEC)
     }
 
     @SuppressWarnings("GroovyVariableNotAssigned")
@@ -176,6 +178,43 @@ class CamelGLiteSpec extends Specification {
 
         then: "the callback should be called"
         consumeOccurred
+    }
+
+    def "CamelGLite supports binding backed registries"() {
+        given: "a binding with the variable foo"
+        def binding = new Binding()
+        binding.setVariable("foo", "fam")
+
+        when: "when I construct an instance of CamelGLite with the Binding"
+        def glite = new CamelGLite(binding)
+
+        then: "then I should be able to retrieve the value of foo from the registry"
+        def registry = glite.camelContext.registry
+        "fam" == registry.lookup("foo")
+
+        when: "when I add variable bar after construction"
+        binding.setVariable("bar", "baz")
+
+        then: "I should be able to grab its value from the registry as well"
+        "baz" == registry.lookup("bar")
+
+        when: "bind method is called"
+        glite.bind(this)
+
+        then: "I should be able to retrieve value from registry and binding"
+        this == registry.lookup(CAMEL_GLITE_SPEC)
+        binding.hasVariable(CAMEL_GLITE_SPEC)
+    }
+
+    def "bind only works if registry is of type Map"() {
+        given: "glite with a context that contains a non Map registry"
+        def glite = new CamelGLite(new JndiRegistry())
+
+        when: "bind is called properly"
+        glite.bind(this)
+
+        then: "exception occurs indicating the call is not supported"
+        thrown UnsupportedOperationException
     }
 
     def getErrorDirectory() {

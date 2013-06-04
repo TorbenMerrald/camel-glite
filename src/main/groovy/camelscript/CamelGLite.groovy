@@ -4,8 +4,8 @@ import groovy.util.logging.Slf4j
 import org.apache.camel.*
 import org.apache.camel.impl.DefaultCamelContext
 import org.apache.camel.impl.DefaultExchange
-import org.apache.camel.impl.PropertyPlaceholderDelegateRegistry
 import org.apache.camel.impl.SimpleRegistry
+import org.apache.camel.spi.Registry
 import org.codehaus.groovy.runtime.typehandling.GroovyCastException
 
 import java.util.concurrent.Future
@@ -21,15 +21,25 @@ class CamelGLite implements Closeable {
     final ConsumerTemplate consumerTemplate
 
     public CamelGLite() {
-        camelContext = new DefaultCamelContext()
-        def registry = new PropertyPlaceholderDelegateRegistry(camelContext, new SimpleRegistry())
-        camelContext.registry = registry
+        this(new SimpleRegistry())
+    }
+
+    public CamelGLite(CamelContext camelContext) {
+        this.camelContext = camelContext
         producerTemplate = camelContext.createProducerTemplate()
         consumerTemplate = camelContext.createConsumerTemplate()
         camelContext.start()
         addShutdownHook {
             close()
         }
+    }
+
+    public CamelGLite(Registry registry) {
+        this(new DefaultCamelContext(registry))
+    }
+
+    public CamelGLite(Binding binding) {
+        this(new BindingBackedRegistry(binding))
     }
 
     CamelGLite bind(object) {
@@ -54,8 +64,13 @@ class CamelGLite implements Closeable {
     CamelGLite bind(String name, object) {
         checkNull(name)
         checkNull(object)
-        //the first registry is a PropertyPlaceholderDelegateRegistry that delegates to a JndiRegsitry
-        Map registry = camelContext.registry.registry
+        //the first registry is a PropertyPlaceholderDelegateRegistry that delegates to a map based registry
+        def delegate = camelContext.registry.delegate
+        def notMap = !(delegate instanceof Map)
+        if (notMap) {
+            throw new UnsupportedOperationException("registry must implement [Map] to use [bind] methods")
+        }
+        Map registry = delegate
         registry[name] = object
         return this
     }
@@ -103,8 +118,7 @@ class CamelGLite implements Closeable {
 
             if (parameter == Exchange && body != null) {
                 processBody.call(body)
-            }
-            else {
+            } else {
                 def messageBody = null
                 if (body) {
                     messageBody = body.in.getBody(parameter)
@@ -114,8 +128,7 @@ class CamelGLite implements Closeable {
                 }
                 if (messageBody != null) {
                     processBody.call(messageBody)
-                }
-                else if (processNull) {
+                } else if (processNull) {
                     processBody.call(null)
                 }
             }
@@ -206,8 +219,7 @@ class WrappedResponseExchange implements Exchange {
         def body = this.out.body
         if (body) {
             throw new GroovyCastException(body, type)
-        }
-        else {
+        } else {
             throw new NullPointerException("Exception body is null, can't convert to $type")
         }
     }
