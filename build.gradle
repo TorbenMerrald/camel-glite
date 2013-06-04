@@ -88,6 +88,7 @@ def configurePom(pom) {
 
     pom.project {
         name = "camel-glite"
+        artifactId = "camel-glite"
         description = project.description
         url = 'https://github.com/upenn-libraries/camel-glite'
         organization {
