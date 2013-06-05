@@ -28,6 +28,8 @@ class CamelGLite implements Closeable {
         this.camelContext = camelContext
         producerTemplate = camelContext.createProducerTemplate()
         consumerTemplate = camelContext.createConsumerTemplate()
+        camelContext.addService(consumerTemplate)
+        camelContext.addService(producerTemplate)
         camelContext.start()
         addShutdownHook {
             close()
