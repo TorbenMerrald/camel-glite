@@ -9,7 +9,7 @@ apply plugin: 'maven'
 sourceCompatibility = "1.7"
 targetCompatibility = "1.7"
 
-version = '0.3.1'
+version = '0.3.2'
 group = 'com.github.camel-glite'
 description = """
 A simple wrapper around Apache Camel's ProducerTemplate and ConsumerTemplate.  Makes it easy to script against camel's
