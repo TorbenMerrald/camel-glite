@@ -131,7 +131,8 @@ class CamelGLite implements Closeable {
 
             if (parameter == Exchange && body != null) {
                 processBody.call(body)
-            } else {
+            }
+            else {
                 def messageBody = null
                 if (body) {
                     messageBody = body.in.getBody(parameter)
@@ -141,7 +142,8 @@ class CamelGLite implements Closeable {
                 }
                 if (messageBody != null) {
                     processBody.call(messageBody)
-                } else if (processNull) {
+                }
+                else if (processNull) {
                     processBody.call(null)
                 }
             }
@@ -178,7 +180,17 @@ class CamelGLite implements Closeable {
     }
 
     Exchange send(String endpoint, body, Map headers) throws ResponseException {
-        DefaultExchange exchange = createExchange(camelContext, body, headers)
+        Exchange exchange
+        if (body instanceof Exchange) {
+            exchange = body.copy()
+            if (exchange.out.body || exchange.out.headers) {
+                exchange.in = exchange.out
+                exchange.out = null
+            }
+        }
+        else {
+            exchange = createExchange(camelContext, body, headers)
+        }
 
         def wrappedResponseExchange = new WrappedResponseExchange()
         def response = producerTemplate.send(endpoint, exchange)
@@ -232,7 +244,8 @@ class WrappedResponseExchange implements Exchange {
         def body = this.out.body
         if (body) {
             throw new GroovyCastException(body, type)
-        } else {
+        }
+        else {
             throw new NullPointerException("Exception body is null, can't convert to $type")
         }
     }

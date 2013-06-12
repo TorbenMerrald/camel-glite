@@ -6,7 +6,9 @@ import org.apache.camel.builder.RouteBuilder
 import org.apache.camel.component.file.GenericFile
 import org.apache.camel.component.file.GenericFileFilter
 import org.apache.camel.component.mock.MockEndpoint
+import org.apache.camel.impl.DefaultExchange
 import org.apache.camel.impl.JndiRegistry
+import org.apache.camel.spi.Registry
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
@@ -17,7 +19,7 @@ import spock.lang.Specification
  */
 class CamelGLiteSpec extends Specification {
 
-    public static final String CAMEL_GLITE_SPEC = "camelGLiteSpec"
+    private static final String CAMEL_GLITE_SPEC = "camelGLiteSpec"
     @Rule
     TemporaryFolder tmpDirectory = new TemporaryFolder()
     def camelGLite = new CamelGLite()
@@ -41,7 +43,7 @@ class CamelGLiteSpec extends Specification {
         camelGLite.bind(this)
 
         then: "the uncapitalized name of the class is used"
-        def registry = camelGLite.camelContext.registry
+        Registry registry = camelGLite.camelContext.registry
         this == registry.lookupByName(CAMEL_GLITE_SPEC)
     }
 
@@ -235,6 +237,34 @@ class CamelGLiteSpec extends Specification {
         then: "at least 2 messages should have been processed"
         !thread.alive
         count >= 2
+    }
+
+    def "exchange pipeline spec"() {
+        given: "an exchange with an out message and simple route"
+        def context = camelGLite.camelContext
+        def exchange = new DefaultExchange(context)
+        def message = "hello from out"
+        exchange.out.body = message
+        boolean inIsOut = false
+        context.addRoutes(
+                new RouteBuilder() {
+                    @Override
+                    void configure() throws Exception {
+                        from("direct:start").process(new Processor() {
+                            @Override
+                            void process(Exchange exchangeToTest) throws Exception {
+                                inIsOut = exchangeToTest.in.body == message
+                            }
+                        })
+                    }
+                }
+        )
+
+        when: "sending the exchange to the simple route"
+        camelGLite.send("direct:start", exchange)
+
+        then: "the output becomes the input message"
+        inIsOut
     }
 
     def getErrorDirectory() {
