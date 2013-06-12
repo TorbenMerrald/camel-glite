@@ -103,6 +103,10 @@ class CamelGLite implements Closeable {
         return this
     }
 
+    Exchange createExchange() {
+        new DefaultExchange(camelContext)
+    }
+
     CamelGLite consumeNoWait(String endpoint, Closure closure) {
         def consumer = { ConsumerTemplate consumerTemplate ->
             return consumerTemplate.receiveNoWait(endpoint)
@@ -196,7 +200,7 @@ class CamelGLite implements Closeable {
             }
         }
         else {
-            exchange = createExchange(camelContext, body, headers)
+            exchange = createExchangeHelper(camelContext, body, headers)
         }
 
         def wrappedResponseExchange = new WrappedResponseExchange()
@@ -215,12 +219,12 @@ class CamelGLite implements Closeable {
     }
 
     Future<Exchange> asyncSend(String endpoint, body, Map headers) {
-        def exchange = createExchange(camelContext, body, headers)
+        def exchange = createExchangeHelper(camelContext, body, headers)
         Future<Exchange> future = producerTemplate.asyncSend(endpoint, exchange)
         return new FutureWrapper(future: future)
     }
 
-    private static DefaultExchange createExchange(CamelContext camelContext, body, headers) {
+    private static DefaultExchange createExchangeHelper(CamelContext camelContext, body, headers) {
         def exchange = new DefaultExchange(camelContext)
         exchange.in.body = body
         exchange.in.headers = headers

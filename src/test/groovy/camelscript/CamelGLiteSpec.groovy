@@ -287,6 +287,14 @@ class CamelGLiteSpec extends Specification {
         ran
     }
 
+    def "createExchange spec"() {
+        when: "create exchange is called"
+        DefaultExchange exchange = camelGLite.createExchange() as DefaultExchange
+
+        then: "an exchange is created using the underlying camelContext"
+        exchange.context == camelGLite.camelContext
+    }
+
     def getErrorDirectory() {
         new File("${tmpDirectory.root.path}/.error")
     }
