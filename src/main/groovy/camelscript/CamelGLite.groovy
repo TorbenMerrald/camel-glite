@@ -2,6 +2,7 @@ package camelscript
 
 import groovy.util.logging.Slf4j
 import org.apache.camel.*
+import org.apache.camel.builder.RouteBuilder
 import org.apache.camel.impl.DefaultCamelContext
 import org.apache.camel.impl.DefaultExchange
 import org.apache.camel.impl.SimpleRegistry
@@ -94,6 +95,12 @@ class CamelGLite implements Closeable {
             consumeWait(endpoint, wait, closure)
         }
         log.info "[consumeForever] was interrupted"
+    }
+
+    CamelGLite addRoutes(RouteBuilder routeBuilder) {
+        camelContext.addRoutes(routeBuilder)
+
+        return this
     }
 
     CamelGLite consumeNoWait(String endpoint, Closure closure) {

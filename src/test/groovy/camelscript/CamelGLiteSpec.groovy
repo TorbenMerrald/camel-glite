@@ -267,6 +267,26 @@ class CamelGLiteSpec extends Specification {
         inIsOut
     }
 
+    def "addRoute spec"() {
+        when: "adding a route"
+        boolean ran = false
+        camelGLite.addRoutes(new RouteBuilder() {
+            @Override
+            void configure() throws Exception {
+                from("direct:start").process(new Processor() {
+                    @Override
+                    void process(Exchange exchange) throws Exception {
+                        ran = true
+                    }
+                })
+            }
+        })
+
+        then: "it is accessible and usable"
+        camelGLite.send("direct:start", "hello")
+        ran
+    }
+
     def getErrorDirectory() {
         new File("${tmpDirectory.root.path}/.error")
     }
