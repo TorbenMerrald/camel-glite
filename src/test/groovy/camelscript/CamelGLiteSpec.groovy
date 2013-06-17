@@ -295,6 +295,33 @@ class CamelGLiteSpec extends Specification {
         exchange.context == camelGLite.camelContext
     }
 
+    def "should be able to send to an endpoint without specifying a body"() {
+        given: "we have a route that accepts exchanges with null bodies"
+        def processed = false
+        def hasNullBody = false
+        camelGLite.addRoutes(new RouteBuilder() {
+            @Override
+            void configure() throws Exception {
+                from("direct:nullBody").process(new Processor() {
+                    @Override
+                    void process(Exchange exchange) throws Exception {
+                        processed = true
+                        hasNullBody = exchange.in.body == null
+                    }
+                })
+            }
+        })
+
+        when: "a message is sent without a body"
+        camelGLite.send("direct:nullBody")
+
+        then: "the route receives and processes the message"
+        processed
+
+        and: "exchange has a null body"
+        hasNullBody
+    }
+
     def getErrorDirectory() {
         new File("${tmpDirectory.root.path}/.error")
     }

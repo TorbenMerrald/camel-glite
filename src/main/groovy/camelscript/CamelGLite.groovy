@@ -186,6 +186,11 @@ class CamelGLite implements Closeable {
         return converted
     }
 
+    Exchange send(String endpoint) {
+        def exchange = createExchange()
+        send(endpoint, exchange)
+    }
+
     Exchange send(String endpoint, body) throws ResponseException {
         send(endpoint, body, [:])
     }
