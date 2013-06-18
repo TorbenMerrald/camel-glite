@@ -103,8 +103,16 @@ class CamelGLite implements Closeable {
         return this
     }
 
-    Exchange createExchange() {
-        new DefaultExchange(camelContext)
+    CamelGLite addRoutes(Closure closure) {
+        def routeBuilder = new CamelGLiteRouteBuilder(closure: closure)
+        addRoutes(routeBuilder)
+
+        return this
+    }
+
+    GLiteExchange createExchange() {
+        def exchange = new DefaultExchange(camelContext)
+        new GLiteExchange(camelGLite: this, exchange: exchange)
     }
 
     CamelGLite consumeNoWait(String endpoint, Closure closure) {
@@ -186,16 +194,16 @@ class CamelGLite implements Closeable {
         return converted
     }
 
-    Exchange send(String endpoint) {
+    GLiteExchange send(String endpoint) {
         def exchange = createExchange()
         send(endpoint, exchange)
     }
 
-    Exchange send(String endpoint, body) throws ResponseException {
+    GLiteExchange send(String endpoint, body) throws GLiteException {
         send(endpoint, body, [:])
     }
 
-    Exchange send(String endpoint, body, Map headers) throws ResponseException {
+    GLiteExchange send(String endpoint, body, Map headers) throws GLiteException {
         Exchange exchange
         if (body instanceof Exchange) {
             exchange = body.copy()
@@ -208,25 +216,25 @@ class CamelGLite implements Closeable {
             exchange = createExchangeHelper(camelContext, body, headers)
         }
 
-        def wrappedResponseExchange = new WrappedResponseExchange()
+        def wrappedResponseExchange = new GLiteExchange(camelGLite: this)
         def response = producerTemplate.send(endpoint, exchange)
         wrappedResponseExchange.exchange = response
 
         if (wrappedResponseExchange.getException()) {
-            throw new ResponseException(wrappedResponseExchange, wrappedResponseExchange.getException())
+            throw new GLiteException(wrappedResponseExchange, wrappedResponseExchange.getException())
         }
 
         return wrappedResponseExchange
     }
 
-    Future<Exchange> asyncSend(String endpoint, body) {
+    Future<GLiteExchange> asyncSend(String endpoint, body) {
         asyncSend(endpoint, body, [:])
     }
 
-    Future<Exchange> asyncSend(String endpoint, body, Map headers) {
+    Future<GLiteExchange> asyncSend(String endpoint, body, Map headers) {
         def exchange = createExchangeHelper(camelContext, body, headers)
         Future<Exchange> future = producerTemplate.asyncSend(endpoint, exchange)
-        return new FutureWrapper(future: future)
+        return new FutureWrapper(future: future, camelGLite: this)
     }
 
     private static DefaultExchange createExchangeHelper(CamelContext camelContext, body, headers) {
@@ -249,9 +257,10 @@ class CamelGLite implements Closeable {
     }
 }
 
-class WrappedResponseExchange implements Exchange {
+class GLiteExchange implements Exchange {
     @Delegate
     Exchange exchange
+    CamelGLite camelGLite
 
     def asType(Class type) {
         def response = exchange.out.getBody(type)
@@ -265,27 +274,41 @@ class WrappedResponseExchange implements Exchange {
             throw new NullPointerException("Exception body is null, can't convert to $type")
         }
     }
+
+    GLiteExchange send(String uri) {
+        camelGLite.send(uri, this)
+    }
+
+    Future<GLiteExchange> asyncSend(String uri) {
+        camelGLite.asyncSend(uri, this)
+    }
+
+    GLiteExchange process(Closure closure) {
+        closure.call(this)
+        return this
+    }
 }
 
-class FutureWrapper implements Future<Exchange> {
+class FutureWrapper implements Future<GLiteExchange> {
     @Delegate
     Future<Exchange> future
+    CamelGLite camelGLite
 
-    Exchange get() {
+    GLiteExchange get() {
         Exchange exchange = future.get()
-        def wrappedResponseExchange = new WrappedResponseExchange(exchange: exchange)
+        def wrappedResponseExchange = new GLiteExchange(camelGLite: camelGLite, exchange: exchange)
         if (wrappedResponseExchange.getException()) {
-            throw new ResponseException(wrappedResponseExchange, wrappedResponseExchange.getException())
+            throw new GLiteException(wrappedResponseExchange, wrappedResponseExchange.getException())
         }
 
         return wrappedResponseExchange
     }
 }
 
-class ResponseException extends Exception {
+class GLiteException extends Exception {
     Exchange exchange
 
-    ResponseException(Exchange exchange, Throwable cause) {
+    GLiteException(Exchange exchange, Throwable cause) {
         super(cause)
         this.exchange = exchange
     }

@@ -13,6 +13,8 @@ import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
 
+import java.util.concurrent.Future
+
 /**
  * @author Tommy Barker
  *
@@ -52,8 +54,9 @@ class CamelGLiteSpec extends Specification {
         when:
         def fromCalled = false
         def body
+        Future<GLiteExchange> future
         camelGLite.with {
-            asyncSend("seda:test", "testBody")
+            future = asyncSend("seda:test", "testBody")
             consume("seda:test") {
                 body = it
                 fromCalled = true
@@ -63,6 +66,7 @@ class CamelGLiteSpec extends Specification {
         then:
         fromCalled
         "testBody" == body
+        future.get().camelGLite
     }
 
     def "test more complex routing"() {
@@ -125,23 +129,12 @@ class CamelGLiteSpec extends Specification {
 
     def "check responses from a route"() {
         when:
-        def camelContext = camelGLite.camelContext
-        camelContext.addRoutes(
-                new RouteBuilder() {
-                    @Override
-                    void configure() throws Exception {
-                        from("direct:start").process(
-                                new Processor() {
-                                    @Override
-                                    void process(Exchange exchange) throws Exception {
-                                        exchange.out.body = 5
-                                    }
-                                }
-                        )
-                    }
-                }
-        )
-        camelContext.start()
+        camelGLite.addRoutes {
+            from("direct:start").process { Exchange exchange ->
+                exchange.out.body = 5
+            }
+        }
+
         int response = camelGLite.send("direct:start", "hello") as int
 
         then:
@@ -156,7 +149,7 @@ class CamelGLiteSpec extends Specification {
         camelGLite.send("direct:start", "foo")
 
         then:
-        thrown ResponseException
+        thrown GLiteException
     }
 
     def "check error handling from async response"() {
@@ -168,7 +161,7 @@ class CamelGLiteSpec extends Specification {
         future.get()
 
         then:
-        thrown ResponseException
+        thrown GLiteException
     }
 
     def "hello world example with timer"() {
@@ -246,19 +239,11 @@ class CamelGLiteSpec extends Specification {
         def message = "hello from out"
         exchange.out.body = message
         boolean inIsOut = false
-        context.addRoutes(
-                new RouteBuilder() {
-                    @Override
-                    void configure() throws Exception {
-                        from("direct:start").process(new Processor() {
-                            @Override
-                            void process(Exchange exchangeToTest) throws Exception {
-                                inIsOut = exchangeToTest.in.body == message
-                            }
-                        })
-                    }
-                }
-        )
+        camelGLite.addRoutes {
+            from("direct:start").process { Exchange exchangeToTest ->
+                inIsOut = exchangeToTest.in.body == message
+            }
+        }
 
         when: "sending the exchange to the simple route"
         camelGLite.send("direct:start", exchange)
@@ -289,7 +274,7 @@ class CamelGLiteSpec extends Specification {
 
     def "createExchange spec"() {
         when: "create exchange is called"
-        DefaultExchange exchange = camelGLite.createExchange() as DefaultExchange
+        GLiteExchange exchange = camelGLite.createExchange()
 
         then: "an exchange is created using the underlying camelContext"
         exchange.context == camelGLite.camelContext
@@ -299,18 +284,13 @@ class CamelGLiteSpec extends Specification {
         given: "we have a route that accepts exchanges with null bodies"
         def processed = false
         def hasNullBody = false
-        camelGLite.addRoutes(new RouteBuilder() {
-            @Override
-            void configure() throws Exception {
-                from("direct:nullBody").process(new Processor() {
-                    @Override
-                    void process(Exchange exchange) throws Exception {
-                        processed = true
-                        hasNullBody = exchange.in.body == null
-                    }
-                })
+        camelGLite.addRoutes {
+            from("direct:nullBody").process { Exchange exchange ->
+                processed = true
+                hasNullBody = exchange.in.body == null
             }
-        })
+        }
+
 
         when: "a message is sent without a body"
         camelGLite.send("direct:nullBody")
@@ -320,6 +300,30 @@ class CamelGLiteSpec extends Specification {
 
         and: "exchange has a null body"
         hasNullBody
+    }
+
+    def "test routing with GLiteExchange"() {
+        given: "an empty exchange"
+        GLiteExchange exchange = camelGLite.createExchange()
+        exchange.in.body = "foo"
+
+        and: "a simple route for it to route to"
+        def inBody
+        camelGLite.addRoutes {
+            from("direct:testExchange").process {
+                inBody = it.in.body
+            }
+        }
+
+        when: "exchange is sent to the route"
+        def processedExchange
+        exchange.send("direct:testExchange").process {
+            processedExchange = it
+        }
+
+        then: "the body is set in the route and is the correct value"
+        "foo" == inBody
+        processedExchange.in.body == exchange.in.body
     }
 
     def getErrorDirectory() {
@@ -337,20 +341,11 @@ class CamelGLiteSpec extends Specification {
     }
 
     def setupErrorRoute() {
-        def camelContext = camelGLite.camelContext
-        camelContext.addRoutes(
-                new RouteBuilder() {
-                    @Override
-                    void configure() throws Exception {
-                        from("direct:start").process(
-                                {
-                                    throw new RuntimeException("meant to do that")
-                                } as Processor
-                        )
-                    }
-                }
-        )
-        camelContext.start()
+        camelGLite.addRoutes {
+            from("direct:start").process {
+                throw new RuntimeException("meant to do that")
+            }
+        }
     }
 }
 
