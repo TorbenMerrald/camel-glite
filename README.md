@@ -50,7 +50,7 @@ Download
 Examples
 ========
 
-Most all functionality comes from the class @CamelScript@ which has
+Most all functionality comes from the class `CamelScript` which has
 methods for receiving and sending data to any supported camel endpoint.
 All examples and functionality can be seen in the groovy docs [here](http://tbarker9.github.io/camel-glite/groovydoc/).
 
