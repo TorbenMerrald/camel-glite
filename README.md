@@ -92,3 +92,47 @@ will ouput something similar to
 14574 [Thread-1] INFO org.apache.camel.impl.DefaultCamelContext - Apache Camel 2.11.0 (CamelContext: camel-1) is shutdown in 0.005 seconds
 ```
 
+Timer example that prints hello
+
+```groovy
+/**
+ * a redo of this <a href:"http://saltnlight5.blogspot.com/2012/08/getting-started-with-apache-camel-using.html">blog</a>
+ * using CamelGLite
+ */
+@Grab("com.github.camel-glite:camel-glite:0.5.RC1")
+@Grab('org.slf4j:slf4j-simple:1.6.6')
+@GrabResolver(name = 'camel-glite', root = 'http://jcenter.bintray.com/')
+import camelscript.CamelGLite
+
+new CamelGLite().with {
+    consumeForever("timer://jdkTimer?period=1000") {
+        send("log://camelLogger?level=INFO").process {
+            println "hello world"
+        }
+    }
+}
+```
+
+will output something similar to
+
+```
+312 [main] INFO org.apache.camel.impl.DefaultCamelContext - Apache Camel 2.11.0 (CamelContext: camel-1) is starting
+409 [main] INFO org.apache.camel.management.ManagementStrategyFactory - JMX enabled.
+634 [main] INFO org.apache.camel.impl.converter.DefaultTypeConverter - Loaded 172 type converters
+658 [main] INFO org.apache.camel.management.DefaultManagementLifecycleStrategy - Load performance statistics enabled.
+700 [main] INFO org.apache.camel.impl.DefaultCamelContext - Total 0 routes, of which 0 is started.
+703 [main] INFO org.apache.camel.impl.DefaultCamelContext - Apache Camel 2.11.0 (CamelContext: camel-1) started in 0.392 seconds
+1956 [main] INFO camelLogger - Exchange[ExchangePattern:InOnly, BodyType:null, Body:[Body is null]]
+hello world
+2806 [main] INFO camelLogger - Exchange[ExchangePattern:InOnly, BodyType:null, Body:[Body is null]]
+hello world
+3806 [main] INFO camelLogger - Exchange[ExchangePattern:InOnly, BodyType:null, Body:[Body is null]]
+hello world
+4806 [main] INFO camelLogger - Exchange[ExchangePattern:InOnly, BodyType:null, Body:[Body is null]]
+hello world
+5807 [main] INFO camelLogger - Exchange[ExchangePattern:InOnly, BodyType:null, Body:[Body is null]]
+hello world
+^C5914 [Thread-1] INFO org.apache.camel.impl.DefaultCamelContext - Apache Camel 2.11.0 (CamelContext: camel-1) is shutting down
+5918 [Thread-1] INFO org.apache.camel.impl.DefaultCamelContext - Uptime 5.610 seconds
+5918 [Thread-1] INFO org.apache.camel.impl.DefaultCamelContext - Apache Camel 2.11.0 (CamelContext: camel-1) is shutdown in 0.004 seconds
+```
