@@ -86,16 +86,7 @@ will ouput something similar to
 2837 [main] INFO camelLogger - Exchange[ExchangePattern:InOnly, BodyType:null, Body:[Body is null]]
 3535 [main] INFO camelLogger - Exchange[ExchangePattern:InOnly, BodyType:null, Body:[Body is null]]
 4534 [main] INFO camelLogger - Exchange[ExchangePattern:InOnly, BodyType:null, Body:[Body is null]]
-5535 [main] INFO camelLogger - Exchange[ExchangePattern:InOnly, BodyType:null, Body:[Body is null]]
-6536 [main] INFO camelLogger - Exchange[ExchangePattern:InOnly, BodyType:null, Body:[Body is null]]
-7535 [main] INFO camelLogger - Exchange[ExchangePattern:InOnly, BodyType:null, Body:[Body is null]]
-8536 [main] INFO camelLogger - Exchange[ExchangePattern:InOnly, BodyType:null, Body:[Body is null]]
-9538 [main] INFO camelLogger - Exchange[ExchangePattern:InOnly, BodyType:null, Body:[Body is null]]
-10538 [main] INFO camelLogger - Exchange[ExchangePattern:InOnly, BodyType:null, Body:[Body is null]]
-11539 [main] INFO camelLogger - Exchange[ExchangePattern:InOnly, BodyType:null, Body:[Body is null]]
-12540 [main] INFO camelLogger - Exchange[ExchangePattern:InOnly, BodyType:null, Body:[Body is null]]
-13541 [main] INFO camelLogger - Exchange[ExchangePattern:InOnly, BodyType:null, Body:[Body is null]]
-^C14542 [main] INFO camelLogger - Exchange[ExchangePattern:InOnly, BodyType:null, Body:[Body is null]]
+... (ctrl-C)
 14569 [Thread-1] INFO org.apache.camel.impl.DefaultCamelContext - Apache Camel 2.11.0 (CamelContext: camel-1) is shutting down
 14574 [Thread-1] INFO org.apache.camel.impl.DefaultCamelContext - Uptime 14.082 seconds
 14574 [Thread-1] INFO org.apache.camel.impl.DefaultCamelContext - Apache Camel 2.11.0 (CamelContext: camel-1) is shutdown in 0.005 seconds
