@@ -9,7 +9,7 @@ Download
 ========
 * Download Directly
 
-    http://dl.bintray.com/upennlib/camel/com/github/camel-glite/camel-glite/<version>/camel-glite-<version>.jar
+    http://dl.bintray.com/upennlib/camel/com/github/camel-glite/camel-glite
 
 * Groovy Grape
 
