@@ -1,0 +1,10 @@
+//Get the context for all closures
+def ctx = context(scope: closureScope())
+
+contributor(ctx, {
+    //See if closure is called within method "runWith"
+    def call = enclosingCall("addRoutes")
+    if (call) {
+        method name: "from", type: "org.apache.camel.model.RouteDefinition", params: [String]
+    }
+})
