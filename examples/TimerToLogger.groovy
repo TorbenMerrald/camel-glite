@@ -7,9 +7,7 @@
 @GrabResolver(name = 'camel-glite', root = 'http://jcenter.bintray.com/')
 import camelscript.CamelGLite
 
-def gLite = new CamelGLite()
-
-gLite.with {
+new CamelGLite().with {
     consumeForever("timer://jdkTimer?period=1000") {
         send("log://camelLogger?level=INFO")
     }
