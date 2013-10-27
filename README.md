@@ -202,3 +202,27 @@ endpoint
 
 Data Conversions
 ----------------
+
+When consuming a message, CamelGLite will attempt to convert the incoming data to whatever is specified by the closure.
+The raw message is a camel `Exchange`.  Assuming that the body of the exchange is a `String`, the following examples would
+be valid:
+
+```groovy
+//grabbing exchange
+consume {Exchange exchange ->
+    //do something
+}
+```
+
+```groovy
+//grabbing exchange
+consume {String exchange ->
+    //do something
+}
+```
+
+Behind the scenes, `CamelGLite` tries to convert the message using camel's conversion tools, if it fails a 
+GroovyCastException is thrown.
+
+
+
