@@ -171,5 +171,34 @@ endpoint is considered complete.
 
 CamelGLite Methods
 ------------------
+**bind(Object object)** - binds an object into camel's registry using the objects simple class name 
 
+**bind(String name, Object object)** - binds an object into camel's registry using the name
 
+**consume(String endpoint, Closure closure)** - a blocking consume that will consume one message when it becomes available.
+If no message is ever available from the `endpoint`, this method will block forever
+
+**consumeForever(String endpoint, Closure closure)** - consumes messages from the `endpoint` forever.  Every 5 seconds the 
+method checks if the thread has been interrupted and stops if it has.
+
+**consumeForever(String endpoint, long wait, Closure closure)** - same as above, but you can set the period for the 
+interruption check
+
+**addRoutes(RouteBuilder routeBuilder)** - add routes to the underlying camel context
+
+**addRoutes(Closure closure)** - add routes to the underlying camel context using a closure.  A `gdsl` exists to assist in
+code completion in Intellij
+
+**send(String endpoint)** - sends an empty exchange to an endpoint
+
+**send(String endpoint, body)** - sends an exchange with the body
+
+**send(String endpoint, body, Map headers)** - sends an exchange with the body and map
+
+**asyncSend(String endpoint, body)** - asynchronously sends an exchange with the body to an endpoint
+
+**asyncSend(String endpoint, body, Map headers)** - asynchronously sends an exchange with the body and headers to an 
+endpoint
+
+Data Conversions
+----------------
