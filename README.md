@@ -43,10 +43,10 @@ Download
     ```
 
 
-CamelScript
------------
+CamelGLite
+----------
 
-Most all functionality comes from the class `CamelScript` which has
+Most all functionality comes from the class `CamelGLite` which has
 methods for receiving and sending data to any supported camel endpoint.
 Many functions in this class revolve around wrapping camel's `ConsumerTemplate`
 and `ProducerTemplate`.  Frequently while writing integration scripts, the 
