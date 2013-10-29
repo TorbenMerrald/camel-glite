@@ -49,10 +49,7 @@ CamelGLite
 Most all functionality comes from the class `CamelGLite` which has
 methods for receiving and sending data to any supported camel endpoint.
 Many functions in this class revolve around wrapping camel's `ConsumerTemplate`
-and `ProducerTemplate`.  Frequently while writing integration scripts, the 
-routing is easy with straight groovy, but the endpoints are still hard
-to manage.  Although `camel-glite` focusses mostly on just consuming and
-sending data to endpoints, it still can run routes.
+and `ProducerTemplate`.
 
 Examples
 --------
