@@ -212,16 +212,20 @@ The raw message is a camel `Exchange`.  Assuming that the body of the exchange i
 be valid:
 
 ```groovy
-//grabbing exchange
-consume {Exchange exchange ->
-    //do something
-}
-```
+import metridoc.core.services.CamelService
+import org.apache.camel.Exchange
 
-```groovy
+def service = includeService(CamelService)
+
+service.send("seda:foo", "bar1")
+service.send("seda:foo", "bar2")
 //grabbing exchange
-consume {String exchange ->
-    //do something
+service.consume("seda:foo") {Exchange exchange ->
+    println exchange.in.body
+}
+//grabbing exchange
+service.consume("seda:foo") {String message ->
+    println message
 }
 ```
 
