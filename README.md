@@ -181,6 +181,13 @@ method checks if the thread has been interrupted and stops if it has.
 **consumeForever(String endpoint, long wait, Closure closure)** - same as above, but you can set the period for the 
 interruption check
 
+**consumeNoWait(String endpoint, Closure closure)** - consumes a message only if it is immediately available
+
+**consumeWait(String endpoint, long wait, Closure closure)** - consumes a message only if it is available within the specified time limit.
+
+**consumeTillDone(String endpoint, long wait = 5000L, Closure closure)** - keeps on consuming messages until no messages are available within the given time limit.  Especially useful for message buses
+
+
 **addRoutes(RouteBuilder routeBuilder)** - add routes to the underlying camel context
 
 **addRoutes(Closure closure)** - add routes to the underlying camel context using a closure.  A `gdsl` exists to assist in
